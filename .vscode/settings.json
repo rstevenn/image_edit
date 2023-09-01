@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "stdlib.h": "c",
-        "stb_image_write.h": "c",
-        "windows.h": "c",
-        "win.h": "c",
-        "log.h": "c"
-    }
-}
