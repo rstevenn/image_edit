@@ -1,0 +1,11 @@
+[     INFO      ] tests/test1.c::SDL_main()::l14: Test 1
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 41
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 133
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 42
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 118
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 92
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 100
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 143
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 74
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 102
+[     INFO      ] tests/test1.c::SDL_main()::l45:  FPS: 91
