@@ -88,4 +88,7 @@ size_t pull_window_event(window_data_t*, call_back_t*);
 void callback_handler(call_back_t);
 void update_texture(window_data_t* window_data);
 
+void stb2bsdl(unsigned char* src, unsigned char* dest, unsigned int w, unsigned int h); 
+void bsdl2stb(unsigned char* src, unsigned char* dest, unsigned int w, unsigned int h); 
+
 #endif

@@ -94,8 +94,8 @@ void CloseLogFile();
 
 
 // NOT NULL
-#define FNOTNULL(ptr, ...) if (ptr == NULL) ERROR(__VA_ARGS__)
-#define PNOTNULL(ptr, ...) if (ptr == NULL) ERROR(__VA_ARGS__)
+#define FNOTNULL(ptr, ...) if ((ptr) == NULL) ERROR(__VA_ARGS__)
+#define PNOTNULL(ptr, ...) if ((ptr) == NULL) ERROR(__VA_ARGS__)
 #define FCHECK(cond, ...) if (!(cond)) ERROR(__VA_ARGS__)
 #define PCHECK(cond, ...) if (!(cond)) ERROR(__VA_ARGS__)
 

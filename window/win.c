@@ -210,6 +210,11 @@ void callback_handler(call_back_t cb) {
 
 void update_texture(window_data_t* window_data) {
     
+    NOTNULL(window_data->window->texture = memcpy(window_data->window->texture, window_data->texture, sizeof(unsigned char)*window_data->w*window_data->h*4),
+            "Can't copy from buffer texture to texture")
+
+
+    /*
     for (int l=0; l<window_data->h; l++) {
         
         for (int j=0; j<window_data->w; j++) {
@@ -218,9 +223,37 @@ void update_texture(window_data_t* window_data) {
                 ((unsigned char *)window_data->window->texture)[coord  ] = window_data->texture[coord+2];
                 ((unsigned char *)window_data->window->texture)[coord+1] = window_data->texture[coord+1];
                 ((unsigned char *)window_data->window->texture)[coord+2] = window_data->texture[coord];
-                ((unsigned char *)window_data->window->texture)[coord+3] = window_data->texture[coord+3];       
+                ((unsigned char *)window_data->window->texture)[coord+3] = window_data->texture[coord+3];        
+        }   
+    } */
+}
+
+
+void stb2bsdl(unsigned char* src, unsigned char* dest, unsigned int w, unsigned int h) {
+    for (int l=0; l<h; l++) {
+        for (int j=0; j<w; j++) {
+                size_t coord = (w*(j))*4+(l)*4;  
                 
+                dest[coord  ] = src[coord+2];
+                dest[coord+1] = src[coord+1];
+                dest[coord+2] = src[coord];
+                dest[coord+3] = src[coord+3];        
         }   
     }
-    
+}
+
+
+
+void bsdl2stb(unsigned char* src, unsigned char* dest, unsigned int w, unsigned int h) {
+    for (int l=0; h; l++) {
+        
+        for (int j=0; j<w; j++) {
+                size_t coord = (w*(j))*4+(l)*4;  
+                
+                dest[coord  ] = src[coord+2];
+                dest[coord+1] = src[coord+1];
+                dest[coord+2] = src[coord];
+                dest[coord+3] = src[coord+3];        
+        }   
+    }
 }

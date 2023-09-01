@@ -30,16 +30,19 @@ int main (int argc, char* argv[]) {
 
     int x, y, comp, res;
     unsigned char *data;
+    unsigned char *image;
 
     res = stbi_info(INPUT_FILE, &x, &y, &comp);
     INFO("File data %s with width=%d height=%d comp=%d res=%d", INPUT_FILE, x, y, comp, res);
 
     data = stbi_load(INPUT_FILE, &x, &y, &comp, 4);
+    NOTNULL(image = (unsigned char *)malloc(sizeof(unsigned char) *x*y*4), "Can't alloc image buffer")
+    stb2bsdl(data, image, x, y);
 
     INFO("File data loaded %s with width=%d height=%d comp=%d", INPUT_FILE, x, y, comp);
     if (data == NULL) { printf("Failed\n"); exit(1);}
 
-    window_data_t* window_data = InitWindow(x, y, data);    
+    window_data_t* window_data = InitWindow(x, y, image);    
     
     (HANDLE)_beginthread(window_th, 0, window_data);
 
@@ -59,6 +62,7 @@ int main (int argc, char* argv[]) {
     }
 
     INFO("Save Image");
+    bsdl2stb(image, data, x, y);
     stbi_write_png(OUTPUT_FILE, x, y, 4, data, 0);
     free(data);
 
