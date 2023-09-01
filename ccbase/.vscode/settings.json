@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "sdl.h": "c",
+        "bsdl.h": "c",
+        "cstdlib": "c",
+        "string.h": "c",
+        "bake.h": "c"
+    }
+}

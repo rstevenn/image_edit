@@ -1,5 +1,5 @@
 # vscode
-*/.vscode/*
+*.vscode/*
 
 # Prerequisites
 *.d
@@ -43,7 +43,7 @@
 *.su
 *.idb
 *.pdb
-*/log.txt
+*log.txt
 
 # Kernel Module Compile Results
 *.mod*
