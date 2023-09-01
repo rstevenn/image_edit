@@ -1,0 +1,1 @@
+gcc tests/test1.c logs/*.c betterSDL/*.c -DBSDL_DEBUG -IC:betterSDL/SDL2/include/ -LC:betterSDL/SDL2/lib/ -lmingw32 -lSDL2main -lSDL2 -o test.exe

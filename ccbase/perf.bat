@@ -1,0 +1,1 @@
+gcc tests/test1.c logs/*.c betterSDL/*.c -O5 -IC:betterSDL/SDL2/include/ -LC:betterSDL/SDL2/lib/ -lmingw32 -lSDL2main -lSDL2 -mwindows -o perf.exe
