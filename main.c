@@ -16,8 +16,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-
-#include "window/win.h"
+#include "src/front_end/win.h"
+#include "src/back_end/server.h"
 
 #define INPUT_FILE "./inp/h849lhurffr71.jpg"
 #define OUTPUT_FILE "./out/out.png"
@@ -42,7 +42,7 @@ int main (int argc, char* argv[]) {
     INFO("File data loaded %s with width=%d height=%d comp=%d", INPUT_FILE, x, y, comp);
     if (data == NULL) { printf("Failed\n"); exit(1);}
 
-    window_data_t* window_data = InitWindow(x, y, image);    
+    app_state_t* window_data = InitWindow(x, y, image);    
     
     (HANDLE)_beginthread(window_th, 0, window_data);
 
