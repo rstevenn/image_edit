@@ -42,22 +42,26 @@ int main (int argc, char* argv[]) {
     INFO("File data loaded %s with width=%d height=%d comp=%d", INPUT_FILE, x, y, comp);
     if (data == NULL) { printf("Failed\n"); exit(1);}
 
-    app_state_t* window_data = InitWindow(x, y, image);    
+    app_state_t* app_data = InitWindow(x, y, image);    
     
-    (HANDLE)_beginthread(window_th, 0, window_data);
+    (HANDLE)_beginthread(window_th, 0, app_data);
 
-    
-    while (window_data->run) {
+    SDL_Delay(1000);
+
+    while (app_data->run) {
         call_back_t call_back;
         INFO("Gota get those event")
 
-        while (pull_window_event(window_data, &call_back) > 0)
+        while (pull_window_event(app_data, &call_back) > 0)
         {
             INFO("called Back")
             callback_handler(call_back);
-        } 
+        }
 
-        SDL_Delay(1);
+        update_texture(app_data);
+
+       
+        //SDL_Delay(1);
         
     }
 
@@ -66,7 +70,7 @@ int main (int argc, char* argv[]) {
     stbi_write_png(OUTPUT_FILE, x, y, 4, data, 0);
     free(data);
 
-    RelaseWindow(window_data);
+    RelaseWindow(app_data);
 
     INFO("Unload Log")
     CloseLogFile();

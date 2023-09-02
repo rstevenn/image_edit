@@ -3,6 +3,8 @@
 
 #include <windows.h>
 #undef ERROR
+#define LOGLEVEL 2
+#define LOGTYPE 2
 #include "../ccbase/betterSDL/bsdl.h"
 
 
@@ -15,7 +17,8 @@ typedef struct {
     unsigned run;
     bsdl_window* window;
 
-    HANDLE win_event_accest_mtx;
+    HANDLE event_acces_mtx;
+    HANDLE texture_update_mtx;
 
     size_t event_nb;
     void* call_backs;

@@ -34,7 +34,5 @@ void RelaseWindow(app_state_t*);
 void window_event_handler(SDL_Event event, bsdl_window* win, void* arg);
 void window_th(void* args);
 
-void update_texture(app_state_t* window_data);
-
 
 #endif
