@@ -5,7 +5,6 @@
 #ifndef __BSDL_H__
 #define __BSDL_H__
 
-#include "../logs/log.h"
 
 typedef unsigned int bsdl_color;
 

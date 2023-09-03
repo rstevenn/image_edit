@@ -3,8 +3,7 @@
 
 #include <windows.h>
 #undef ERROR
-#define LOGLEVEL 2
-#define LOGTYPE 2
+
 #include "../ccbase/betterSDL/bsdl.h"
 
 

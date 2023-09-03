@@ -1,0 +1,1 @@
+gcc main.c  -O5 ccbase/logs/*.c ccbase/betterSDL/*.c src/front_end/win.c src/back_end/server.c -IC:ccbase/betterSDL/SDL2/include/ -LC:ccbase/betterSDL/SDL2/lib/ -lmingw32 -lSDL2main -lSDL2 -mwindows -o main.exe

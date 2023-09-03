@@ -14,7 +14,7 @@ app_state_t* InitWindow(size_t w, size_t h, unsigned char* texture){
     app_data->h = w;
     app_data->w = h;
     app_data->texture = texture;
-    app_data->run = 1;
+    app_data->run = 0;
     app_data->event_nb = 0;
     app_data->call_backs = NULL;
     app_data->window = NULL;
@@ -84,6 +84,7 @@ void window_th(void* args) {
     app_data->window = window;
 
     mouse_state_t mouse_state = {0};
+    app_data->run = 1;
 
     while (! mouse_state.quit) {
         
@@ -130,7 +131,7 @@ void window_th(void* args) {
             INFO("Mutex released")
 
         }
-        SDL_Delay(10);
+        SDL_Delay(1);
         
     }
 

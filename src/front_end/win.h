@@ -10,9 +10,8 @@
 #include <windows.h>
 #undef ERROR
 
-#define LOGLEVEL 2
-#define LOGTYPE 2
 
+#include "../../config.h"
 #include "../../ccbase/logs/log.h"
 #include "../../ccbase/betterSDL/bsdl.h"
 

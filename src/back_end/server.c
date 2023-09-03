@@ -64,8 +64,8 @@ void draw_pxl(draw_pixel_data_t* data) {
             data->win->texture[coord+2] = data->color[2];
             data->win->texture[coord+3] = data->color[3];
     }
-
 }
+
 
 void update_texture(app_state_t* app_data) {
 

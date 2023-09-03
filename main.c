@@ -3,10 +3,9 @@
 #include <time.h>
 #include <windows.h>
 
-#define LOGLEVEL 2
-#define LOGTYPE 2
 
 #undef ERROR
+#include "config.h"
 #include "ccbase/logs/log.h"
 #include "ccbase/betterSDL/bsdl.h"
 
@@ -19,8 +18,6 @@
 #include "src/front_end/win.h"
 #include "src/back_end/server.h"
 
-#define INPUT_FILE "./inp/h849lhurffr71.jpg"
-#define OUTPUT_FILE "./out/out.png"
 
 
 int main (int argc, char* argv[]) {
@@ -46,7 +43,10 @@ int main (int argc, char* argv[]) {
     
     (HANDLE)_beginthread(window_th, 0, app_data);
 
-    SDL_Delay(1000);
+    do {
+        SDL_Delay(1);
+    } while (! (app_data->run));
+    
 
     while (app_data->run) {
         call_back_t call_back;
@@ -59,9 +59,7 @@ int main (int argc, char* argv[]) {
         }
 
         update_texture(app_data);
-
-       
-        //SDL_Delay(1);
+        SDL_Delay(1);
         
     }
 
