@@ -1,4 +1,89 @@
 #include "server.h"
+#include <math.h>
+
+float length(float dx, float dy) {
+    return sqrtf((dx)*(dx) + (dy)*(dy));
+}
+
+void cubic_smoothing(mouse_pos_history_t state, int* x, int* y, size_t* size) {
+
+
+    float alpha = 0.99;
+
+    if (state.prev_size == 1) {
+        INFO("SMOOTH 1")
+        free(x); free(y);
+        
+        float px = (float)state.x[state.prev_size-1];
+        float py = (float)state.y[state.prev_size-1];
+
+        // push init pos
+        NOTNULL(x = (int*)malloc(sizeof(int)), "can't allocate memory")
+        NOTNULL(y = (int*)malloc(sizeof(int)), "can't allocate memory")
+        x[0] = px; y[0] = py;
+
+        size[0] = 1;
+        INFO("SMOOTH 1 END")
+
+    } else if (state.prev_size == 2) {
+
+        free(x); free(y);
+        
+        float px = (float)state.x[state.prev_size-1];
+        float py = (float)state.y[state.prev_size-1];
+
+        // push init pos
+        NOTNULL(x = (int*)malloc(sizeof(int)), "can't allocate memory")
+        NOTNULL(y = (int*)malloc(sizeof(int)), "can't allocate memory")
+        x[0] = px; y[0] = py;
+
+        size[0] = 1;
+
+    } else {
+        INFO("SMOOTH >2")
+        float dxa = (float)state.x[state.prev_size-2] - (float)state.x[state.prev_size-3]; 
+        float dya = (float)state.y[state.prev_size-2] - (float)state.y[state.prev_size-3];
+
+        float la = length(dxa, dya);
+
+        float vx = dxa / la;
+        float vy = dya / la;
+
+        size_t i=1;
+        free(x); free(y);
+        
+        float px = (float)state.x[state.prev_size-2];
+        float py = (float)state.y[state.prev_size-2];
+
+        // push init pos
+        NOTNULL(x = (int*)malloc(sizeof(int)), "can't allocate memory")
+        NOTNULL(y = (int*)malloc(sizeof(int)), "can't allocate memory")
+        x[0] = px; y[0] = py;
+
+
+        while (px != state.x[state.prev_size-1] ||
+               py != state.y[state.prev_size-1]) {
+
+            px += vx;
+            py += vy; 
+
+            float target_vx = state.x[state.prev_size-1] - px;
+            float target_vy = state.y[state.prev_size-1] - py;
+
+            vx = vx * alpha + (1-alpha) * state.x[state.prev_size-1];
+            vy = vy * alpha + (1-alpha) * state.y[state.prev_size-1];
+            alpha = alpha*alpha;
+
+            i++;
+            NOTNULL(x = (int*)realloc(x, sizeof(int)*i), "can't allocate memory")
+            NOTNULL(y = (int*)realloc(y, sizeof(int)*i), "can't allocate memory")
+
+            x[i-1] = px;
+            y[i-1] = py;
+            size[0] = i;
+        }
+    }
+}
 
 
 size_t pull_window_event(app_state_t* app_data, call_back_t* call_back) {
@@ -32,6 +117,7 @@ size_t pull_window_event(app_state_t* app_data, call_back_t* call_back) {
 
 }
 
+
 void callback_handler(call_back_t cb) {
 
     INFO("call_back start")
@@ -52,18 +138,31 @@ void callback_handler(call_back_t cb) {
 
 void draw_pxl(draw_pixel_data_t* data) {
     INFO("Draw pixel")
-    if (0 < data->u && data->u < 1 &&
-        0 < data->v && data->v < 1 ) {
+
+    int* x;
+    int* y;
+    size_t size;
+
+    data->smoothing(data->mouse_hist, x, y, &size);
+    INFO("Smoothed")
+
+    for (size_t id=0; id<size; id++) {
+
+        if (0 < x[id] && x[id] < data->win->w &&
+            0 < y[id] && y[id] < data->win->h ) {
             
-            size_t i = data->u*data->win->w;
-            size_t j = data->v*data->win->h;
+            size_t i = x[id];
+            size_t j = y[id];
             size_t coord = (j*data->win->w)*4 + 4*i;
             
             data->win->texture[coord  ] = data->color[0];
             data->win->texture[coord+1] = data->color[1];
             data->win->texture[coord+2] = data->color[2];
             data->win->texture[coord+3] = data->color[3];
+        } 
     }
+
+    free(x); free(y);
 }
 
 

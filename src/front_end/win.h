@@ -21,6 +21,8 @@ typedef struct {
     unsigned char right;
     int x, y;
     unsigned char quit;
+
+
 } mouse_state_t;
 
 

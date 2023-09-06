@@ -16,8 +16,10 @@
 
 // communication with front end
 size_t pull_window_event(app_state_t*, call_back_t*);
-void callback_handler(call_back_t);
 void update_texture(app_state_t* window_data);
+
+void callback_handler(call_back_t);
+
 
 // main texture gestion
 void stb2bsdl(unsigned char* src, unsigned char* dest, unsigned int w, unsigned int h); 

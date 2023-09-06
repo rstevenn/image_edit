@@ -6,6 +6,8 @@
 unsigned char window_is_init = 0;
 
 
+
+
 app_state_t* InitWindow(size_t w, size_t h, unsigned char* texture){
     INFO("Init Window")
     window_is_init = 1;
@@ -86,6 +88,10 @@ void window_th(void* args) {
     mouse_state_t mouse_state = {0};
     app_data->run = 1;
 
+    mouse_pos_history_t mouse_hist = {0};
+    mouse_hist.prev_size = 0;
+
+
     while (! mouse_state.quit) {
         
         CHECK(WaitForSingleObject(app_data->texture_update_mtx, WAIT_TIMEOUT) == 0, "wait mutex failed")
@@ -98,7 +104,16 @@ void window_th(void* args) {
             CHECK(WaitForSingleObject(app_data->event_acces_mtx, WAIT_TIMEOUT) == 0, "wait mutex failed")
             INFO("Acces mutex")
             
+            // add to history
+            for (size_t i=0; i< MAX_MOUSE_HISTORY-1; i++) {
+                mouse_hist.x[i+1] = mouse_hist.x[i];
+                mouse_hist.y[i+1] = mouse_hist.y[i]; 
+            }
 
+            if (mouse_hist.prev_size < MAX_MOUSE_HISTORY)
+                mouse_hist.prev_size++;
+
+            // add action to queue
             queue = (call_back_t *)(app_data->call_backs);
             NOTNULL((queue = realloc(queue, (app_data->event_nb+1) * sizeof(call_back_t))), "Can't realloc the event queue")
     
@@ -115,8 +130,11 @@ void window_th(void* args) {
             if (w == 0) w = 1;
             if (h == 0) h = 1;
 
-            cb_data.u = ((float)mouse_state.x) / (float)w;
-            cb_data.v = ((float)mouse_state.y) / (float)h;
+            mouse_hist.x[0] = mouse_state.y;
+            mouse_hist.y[0] = mouse_state.x;
+
+            cb_data.mouse_hist = mouse_hist;
+            cb_data.smoothing = &cubic_smoothing;
             cb_data.win = app_data;
 
             queue[app_data->event_nb].data.draw_pixel_data = cb_data;
@@ -130,7 +148,11 @@ void window_th(void* args) {
             CHECK(ReleaseMutex(app_data->event_acces_mtx) != 0, "Failed to release mutex");
             INFO("Mutex released")
 
+
+        } else {
+            mouse_hist.prev_size = 0;
         }
+
         SDL_Delay(1);
         
     }
