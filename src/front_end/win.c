@@ -88,7 +88,7 @@ void window_th(void* args) {
     mouse_state_t mouse_state = {0};
     app_data->run = 1;
 
-    mouse_pos_history_t mouse_hist = {0};
+    mouse_pos_history_t mouse_hist;
     mouse_hist.prev_size = 0;
 
 
@@ -130,10 +130,16 @@ void window_th(void* args) {
             if (w == 0) w = 1;
             if (h == 0) h = 1;
 
-            mouse_hist.x[0] = mouse_state.y;
-            mouse_hist.y[0] = mouse_state.x;
+            mouse_hist.x[0] = window->width*mouse_state.x/w;
+            mouse_hist.y[0] = window->height*mouse_state.y/h;
 
-            cb_data.mouse_hist = mouse_hist;
+            mouse_pos_history_t mouse_tmp_hist;
+            mouse_tmp_hist.prev_size = mouse_hist.prev_size;
+            memcpy(mouse_tmp_hist.x, mouse_hist.x, sizeof(int)*mouse_tmp_hist.prev_size);
+            memcpy(mouse_tmp_hist.y, mouse_hist.y, sizeof(int)*mouse_tmp_hist.prev_size);
+            
+
+            cb_data.mouse_hist = mouse_tmp_hist;
             cb_data.smoothing = &cubic_smoothing;
             cb_data.win = app_data;
 

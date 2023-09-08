@@ -32,9 +32,16 @@ typedef struct {
     size_t prev_size;
 } mouse_pos_history_t;
 
+// smooth data
+typedef struct {
+    size_t size;
+    int* x;
+    int* y;
+} smoothed_path_t;
+
 
 // call backs 
-typedef void(smoothing_t)(mouse_pos_history_t state, int* x, int* y, size_t* size); 
+typedef void(smoothing_t)(mouse_pos_history_t state, smoothed_path_t* smoothed_path); 
 
 typedef struct {
     mouse_pos_history_t mouse_hist;
@@ -76,7 +83,7 @@ typedef struct {
 
 // functions for callbak
 void draw_pxl(draw_pixel_data_t* data);
-void cubic_smoothing(mouse_pos_history_t state, int* x, int* y, size_t* size); // ALLOCATE DATA ON X Y 
+void cubic_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path); // ALLOCATE DATA ON X Y 
 
 
 #endif 

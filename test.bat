@@ -1,0 +1,2 @@
+gcc test.c ccbase/logs/*.c ccbase/betterSDL/*.c src/front_end/win.c src/back_end/server.c -DBSDL_DEBUG -DDEBUGIMEDIT -IC:ccbase/betterSDL/SDL2/include/ -LC:ccbase/betterSDL/SDL2/lib/ -lmingw32 -lSDL2main -lSDL2 -o test.exe
+test.exe

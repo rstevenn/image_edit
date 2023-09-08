@@ -5,82 +5,100 @@ float length(float dx, float dy) {
     return sqrtf((dx)*(dx) + (dy)*(dy));
 }
 
-void cubic_smoothing(mouse_pos_history_t state, int* x, int* y, size_t* size) {
+void cubic_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path) {
 
 
-    float alpha = 0.99;
+    float alpha = 0.9;
 
     if (state.prev_size == 1) {
         INFO("SMOOTH 1")
-        free(x); free(y);
         
-        float px = (float)state.x[state.prev_size-1];
-        float py = (float)state.y[state.prev_size-1];
+        
+        float px = (float)state.x[0];
+        float py = (float)state.y[0];
+        INFO("GOT POS")
 
         // push init pos
-        NOTNULL(x = (int*)malloc(sizeof(int)), "can't allocate memory")
-        NOTNULL(y = (int*)malloc(sizeof(int)), "can't allocate memory")
-        x[0] = px; y[0] = py;
+        NOTNULL(smoothed_path->x = (int*)malloc(sizeof(int)), "can't allocate memory")
+        NOTNULL(smoothed_path->y = (int*)malloc(sizeof(int)), "can't allocate memory")
+        smoothed_path->x[0] = px; smoothed_path->y[0] = py;
 
-        size[0] = 1;
+        smoothed_path->size = 1;
         INFO("SMOOTH 1 END")
 
     } else if (state.prev_size == 2) {
 
-        free(x); free(y);
         
-        float px = (float)state.x[state.prev_size-1];
-        float py = (float)state.y[state.prev_size-1];
+        float px = (float)state.x[0];
+        float py = (float)state.y[0];
 
         // push init pos
-        NOTNULL(x = (int*)malloc(sizeof(int)), "can't allocate memory")
-        NOTNULL(y = (int*)malloc(sizeof(int)), "can't allocate memory")
-        x[0] = px; y[0] = py;
+        NOTNULL(smoothed_path->x = (int*)malloc(sizeof(int)), "can't allocate memory")
+        NOTNULL(smoothed_path->y = (int*)malloc(sizeof(int)), "can't allocate memory")
+        smoothed_path->x[0] = px; smoothed_path->y[0] = py;
 
-        size[0] = 1;
+        smoothed_path->size = 1;
 
     } else {
         INFO("SMOOTH >2")
-        float dxa = (float)state.x[state.prev_size-2] - (float)state.x[state.prev_size-3]; 
-        float dya = (float)state.y[state.prev_size-2] - (float)state.y[state.prev_size-3];
+        float dxa = (float)state.x[1] - (float)state.x[2]; 
+        float dya = (float)state.y[1] - (float)state.y[2];
 
         float la = length(dxa, dya);
 
-        float vx = dxa / la;
-        float vy = dya / la;
+        float vx, vy;
+
+        if (la > 0) {
+            vx = dxa / la;
+            vy = dya / la;
+        } else {
+            vx = 0;
+            vy = 0;   
+        }
 
         size_t i=1;
-        free(x); free(y);
         
-        float px = (float)state.x[state.prev_size-2];
-        float py = (float)state.y[state.prev_size-2];
+        float px = (float)state.x[1];
+        float py = (float)state.y[1];
 
         // push init pos
-        NOTNULL(x = (int*)malloc(sizeof(int)), "can't allocate memory")
-        NOTNULL(y = (int*)malloc(sizeof(int)), "can't allocate memory")
-        x[0] = px; y[0] = py;
+        NOTNULL(smoothed_path->x = (int*)malloc(sizeof(int)), "can't allocate memory")
+        NOTNULL(smoothed_path->y = (int*)malloc(sizeof(int)), "can't allocate memory")
+        smoothed_path->x[0] = px; smoothed_path->y[0] = py;
 
+        INFO("pos: %f %f", px, py)
+        INFO("target pos: %f %f", (float)state.x[0], (float)state.y[0])
+        INFO("LOOP STATUTS: %lu", px != (float)state.x[0] || py != (float)state.y[0])
 
-        while (px != state.x[state.prev_size-1] ||
-               py != state.y[state.prev_size-1]) {
+        while (px != state.x[0] ||
+               py != state.y[0]) {
+            INFO("LOOP")
+            //INFO("Dist: %f", length( px-(float)state.x[0], py-(float)state.y[0]))
+            //INFO("speed: %f %f", vx, vy)
 
             px += vx;
             py += vy; 
 
-            float target_vx = state.x[state.prev_size-1] - px;
-            float target_vy = state.y[state.prev_size-1] - py;
+            float target_vx = (float)state.x[0] - px;
+            float target_vy = (float)state.y[0] - py;
 
-            vx = vx * alpha + (1-alpha) * state.x[state.prev_size-1];
-            vy = vy * alpha + (1-alpha) * state.y[state.prev_size-1];
+            if (length(target_vx, target_vy) > 1) {
+                vx = vx * alpha + (1-alpha) * target_vx / length(target_vx, target_vy);
+                vy = vy * alpha + (1-alpha) * target_vy / length(target_vx, target_vy);
+            } else {
+                vx = vx * alpha + (1-alpha) * target_vx;
+                vy = vy * alpha + (1-alpha) * target_vy;
+            }
+            
             alpha = alpha*alpha;
 
             i++;
-            NOTNULL(x = (int*)realloc(x, sizeof(int)*i), "can't allocate memory")
-            NOTNULL(y = (int*)realloc(y, sizeof(int)*i), "can't allocate memory")
+            NOTNULL(smoothed_path->x = (int*)realloc(smoothed_path->x, sizeof(int)*i), "can't allocate memory")
+            NOTNULL(smoothed_path->y = (int*)realloc(smoothed_path->y, sizeof(int)*i), "can't allocate memory")
 
-            x[i-1] = px;
-            y[i-1] = py;
-            size[0] = i;
+            smoothed_path->x[i-1] = px;
+            smoothed_path->y[i-1] = py;
+            smoothed_path->size = i;
         }
     }
 }
@@ -139,20 +157,18 @@ void callback_handler(call_back_t cb) {
 void draw_pxl(draw_pixel_data_t* data) {
     INFO("Draw pixel")
 
-    int* x;
-    int* y;
-    size_t size;
-
-    data->smoothing(data->mouse_hist, x, y, &size);
+    smoothed_path_t smoothed_path = {0};
+    (*data->smoothing)(data->mouse_hist, &smoothed_path);
     INFO("Smoothed")
 
-    for (size_t id=0; id<size; id++) {
+    for (size_t id=0; id<smoothed_path.size; id++) {
 
-        if (0 < x[id] && x[id] < data->win->w &&
-            0 < y[id] && y[id] < data->win->h ) {
-            
-            size_t i = x[id];
-            size_t j = y[id];
+        if (0 < smoothed_path.x[id] && smoothed_path.x[id] < data->win->w &&
+            0 < smoothed_path.y[id] && smoothed_path.y[id] < data->win->h ) {
+
+            INFO("DRAW %d %d", smoothed_path.x[id], smoothed_path.y[id])
+            size_t i = smoothed_path.x[id];
+            size_t j = smoothed_path.y[id];
             size_t coord = (j*data->win->w)*4 + 4*i;
             
             data->win->texture[coord  ] = data->color[0];
@@ -162,7 +178,8 @@ void draw_pxl(draw_pixel_data_t* data) {
         } 
     }
 
-    free(x); free(y);
+    free(smoothed_path.x); free(smoothed_path.y);
+    INFO("end draw pxl")
 }
 
 

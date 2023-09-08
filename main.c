@@ -15,6 +15,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
+#include "src/shared_def.h"
 #include "src/front_end/win.h"
 #include "src/back_end/server.h"
 
