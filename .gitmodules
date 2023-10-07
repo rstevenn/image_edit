@@ -1,3 +1,6 @@
 [submodule "stb"]
 	path = stb
 	url = https://github.com/nothings/stb
+[submodule "ccbase"]
+	path = ccbase
+	url = https://github.com/rstevenn/ccbase/
