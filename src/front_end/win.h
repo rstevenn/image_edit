@@ -6,25 +6,12 @@
 #include <stdlib.h>
 
 #include "../shared_def.h"
-#undef ERROR
 #include <windows.h>
-#undef ERROR
 
 
 #include "../../config.h"
 #include "../../ccbase/logs/log.h"
 #include "../../ccbase/betterSDL/bsdl.h"
-
-
-typedef struct {
-    unsigned char left;
-    unsigned char right;
-    int x, y;
-    unsigned char quit;
-
-
-} mouse_state_t;
-
 
 
 // functions

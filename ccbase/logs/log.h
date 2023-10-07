@@ -6,7 +6,7 @@
 // init create and delete logFile
 // Use a singleton like pointer shared throug all the project
 
-void InitLog(const char* path); 
+void ccb_InitLog(const char* path); 
 /**
  * @brief Init the globaly shared log file pointer (one init by project)
  * 
@@ -16,7 +16,7 @@ void InitLog(const char* path);
  * @since 15-11-2022
 **/
 
-FILE* GetLogFile();
+FILE* ccb_GetLogFile();
 /**
  * @brief Get the globaly shared log file pointer
  * 
@@ -26,7 +26,7 @@ FILE* GetLogFile();
  * @since 15-11-2022
 **/
 
-void CloseLogFile();
+void ccb_CloseLogFile();
 /**
  * @brief Close the globaly shared log file pointer (one close by project)
  * 
@@ -45,85 +45,85 @@ void CloseLogFile();
     The macros must be define before including this file
     The value of these macros can be changed in each file independently
 
-    LOGLEVEL:
-        LOGLEVEL = 0 or undifiend: Only shows ERRORS
-        LOGLEVEL = 1: Show ERRORS and WARNINGS
-        LOGLEVEL = 2: Show ERRORS WARNINGS INFO and NOTIMPLEMENTED
+    CCB_LOGLEVEL:
+        CCB_LOGLEVEL = 0 or undifiend: Only shows ERRORS
+        CCB_LOGLEVEL = 1: Show ERRORS and WARNINGS
+        CCB_LOGLEVEL = 2: Show ERRORS WARNINGS INFO and NOTIMPLEMENTED
 
-    LOGTYPE:
-        LOGTYPE = 0 or undifiend: print logs in the command prompt
-        LOGTYPE = 1: print logs in the log file
-        LOGTYPE = 2: print logs in the command prompt and log file
+    CCB_LOGTYPE:
+        CCB_LOGTYPE = 0 or undifiend: print logs in the command prompt
+        CCB_LOGTYPE = 1: print logs in the log file
+        CCB_LOGTYPE = 2: print logs in the command prompt and log file
 */
 
 
 // ERRORS
-#define FERROR(...) { fprintf(GetLogFile(), "[     ERROR     ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
-                          fprintf(GetLogFile(), __VA_ARGS__);}
-#define PERROR(...) { printf("[     ERROR     ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
+#define CCB_FERROR(...) { fprintf(ccb_GetLogFile(), "[     ERROR     ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
+                          fprintf(ccb_GetLogFile(), __VA_ARGS__);}
+#define CCB_PERROR(...) { printf("[     ERROR     ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
                            printf(__VA_ARGS__); printf("\n");}
 
 // WARNINGS
-#if LOGLEVEL >= 1
-    #define FWARNING(...) { fprintf(GetLogFile(), "[    WARNING    ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
-                            fprintf(GetLogFile(), __VA_ARGS__); fprintf(GetLogFile(), "\n");} 
-    #define PWARNING(...) { printf("[    WARNING    ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
+#if CCB_LOGLEVEL >= 1
+    #define CCB_FWARNING(...) { fprintf(ccb_GetLogFile(), "[    WARNING    ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
+                            fprintf(ccb_GetLogFile(), __VA_ARGS__); fprintf(ccb_GetLogFile(), "\n");} 
+    #define CCB_PWARNING(...) { printf("[    WARNING    ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
                             printf(__VA_ARGS__); printf("\n"); }
 #else
-    #define FWARNING(...)
-    #define PWARNING(...)
+    #define CCB_FWARNING(...)
+    #define CCB_PWARNING(...)
 #endif
 
 
 // INFOS & NOTIMP
-#if LOGLEVEL >= 2
-    #define FINFO(...) { fprintf(GetLogFile(), "[     INFO      ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
-                         fprintf(GetLogFile(), __VA_ARGS__); fprintf(GetLogFile(), "\n");}
-    #define PINFO(...) { printf("[     INFO      ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
+#if CCB_LOGLEVEL >= 2
+    #define CCB_FINFO(...) { fprintf(ccb_GetLogFile(), "[     INFO      ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
+                         fprintf(ccb_GetLogFile(), __VA_ARGS__); fprintf(ccb_GetLogFile(), "\n");}
+    #define CCB_PINFO(...) { printf("[     INFO      ] %s::%s()::l%d: ", __FILE__, __FUNCTION__, __LINE__); \
                          printf(__VA_ARGS__); printf("\n"); }
 
-    #define PNOT_IMPLEMENTED() {fprintf(GetLogFile(), "[NOT IMPLEMENTED] %s::%s()::l%d\n", __FILE__, __FUNCTION__, __LINE__);}
-    #define FNOT_IMPLEMENTED() {printf("[NOT IMPLEMENTED] %s::%s()::l%d\n", __FILE__, __FUNCTION__, __LINE__);}
+    #define CCB_PNOT_IMPLEMENTED() {fprintf(GetLogFile(), "[NOT IMPLEMENTED] %s::%s()::l%d\n", __FILE__, __FUNCTION__, __LINE__);}
+    #define CCB_FNOT_IMPLEMENTED() {printf("[NOT IMPLEMENTED] %s::%s()::l%d\n", __FILE__, __FUNCTION__, __LINE__);}
 
 #else
-    #define FINFO(...)
-    #define PINFO(...)
-    #define PNOT_IMPLEMENTED()
-    #define FNOT_IMPLEMENTED()
+    #define CCB_FINFO(...)
+    #define CCB_PINFO(...)
+    #define CCB_PNOT_IMPLEMENTED()
+    #define CCB_FNOT_IMPLEMENTED()
 #endif
 
 
 // NOT NULL
-#define FNOTNULL(ptr, ...) if ((ptr) == NULL) ERROR(__VA_ARGS__)
-#define PNOTNULL(ptr, ...) if ((ptr) == NULL) ERROR(__VA_ARGS__)
-#define FCHECK(cond, ...) if (!(cond)) ERROR(__VA_ARGS__)
-#define PCHECK(cond, ...) if (!(cond)) ERROR(__VA_ARGS__)
+#define CCB_FNOTNULL(ptr, ...) if (ptr == NULL) CCB_ERROR(__VA_ARGS__)
+#define CCB_PNOTNULL(ptr, ...) if (ptr == NULL) CCB_ERROR(__VA_ARGS__)
+#define CCB_FCHECK(cond, ...) if (!(cond)) CCB_ERROR(__VA_ARGS__)
+#define CCB_PCHECK(cond, ...) if (!(cond)) CCB_ERROR(__VA_ARGS__)
 
 // DEFAULT VERSIONS
-#if LOGTYPE == 1
-    #define ERROR(...) {FERROR(__VA_ARGS__); exit(-1);}
-    #define WARNING(...) FWARNING(__VA_ARGS__)
-    #define INFO(...) FINFO(__VA_ARGS__)
-    #define NOT_IMPLEMENTED() FNOT_IMPLEMENTED()
-    #define NOTNULL(ptr, ...) FNOTNULL(ptr, __VA_ARGS__)
-    #define CHECK(cond, ...) FCHECK(cond, __VA_ARGS__)
+#if CCB_LOGTYPE == 1
+    #define CCB_ERROR(...) {CCB_FERROR(__VA_ARGS__); exit(-1);}
+    #define CCB_WARNING(...) CCB_FWARNING(__VA_ARGS__)
+    #define CCB_INFO(...) CCB_FINFO(__VA_ARGS__)
+    #define CCB_NOT_IMPLEMENTED() CCB_FNOT_IMPLEMENTED()
+    #define CCB_NOTNULL(ptr, ...) CCB_FNOTNULL(ptr, __VA_ARGS__)
+    #define CCB_CHECK(cond, ...) CCB_FCHECK(cond, __VA_ARGS__)
 
 #else
-#if LOGTYPE == 2
-    #define ERROR(...) {PERROR(__VA_ARGS__) FERROR(__VA_ARGS__) exit(-1); }
-    #define WARNING(...) PWARNING(__VA_ARGS__) FWARNING(__VA_ARGS__)
-    #define INFO(...) PINFO(__VA_ARGS__) FINFO(__VA_ARGS__)
-    #define NOT_IMPLEMENTED() PNOT_IMPLEMENTED() FNOT_IMPLEMENTED()
-    #define NOTNULL(ptr, ...) PNOTNULL(ptr, __VA_ARGS__) FNOTNULL(ptr, __VA_ARGS__)
-    #define CHECK(cond, ...) PCHECK(cond, __VA_ARGS__) FCHECK(cond, __VA_ARGS__)
+#if CCB_LOGTYPE == 2
+    #define CCB_ERROR(...) {CCB_PERROR(__VA_ARGS__) CCB_FERROR(__VA_ARGS__) exit(-1); }
+    #define CCB_WARNING(...) CCB_PWARNING(__VA_ARGS__) CCB_FWARNING(__VA_ARGS__)
+    #define CCB_INFO(...) CCB_PINFO(__VA_ARGS__) CCB_FINFO(__VA_ARGS__)
+    #define CCB_NOT_IMPLEMENTED() CCB_PNOT_IMPLEMENTED() CCB_FNOT_IMPLEMENTED()
+    #define CCB_NOTNULL(ptr, ...) CCB_PNOTNULL(ptr, __VA_ARGS__) CCB_FNOTNULL(ptr, __VA_ARGS__)
+    #define CCB_CHECK(cond, ...) CCB_PCHECK(cond, __VA_ARGS__) CCB_FCHECK(cond, __VA_ARGS__)
 
 #else
-    #define ERROR(...) {PERROR(__VA_ARGS__) exit(-1);}
-    #define WARNING(...) PWARNING(__VA_ARGS__)
-    #define INFO(...) PINFO(__VA_ARGS__)
-    #define NOT_IMPLEMENTED() PNOT_IMPLEMENTED()
-    #define NOTNULL(ptr, ...) PNOTNULL(ptr, __VA_ARGS__)
-    #define CHECK(cond, ...) PCHECK(cond, __VA_ARGS__)
+    #define CCB_ERROR(...) {CCB_PERROR(__VA_ARGS__) exit(-1);}
+    #define CCB_WARNING(...) CCB_PWARNING(__VA_ARGS__)
+    #define CCB_INFO(...) CCB_PINFO(__VA_ARGS__)
+    #define CCB_NOT_IMPLEMENTED() CCB_PNOT_IMPLEMENTED()
+    #define CCB_NOTNULL(ptr, ...) CCB_PNOTNULL(ptr, __VA_ARGS__)
+    #define CCB_CHECK(cond, ...) CCB_PCHECK(cond, __VA_ARGS__)
 
 #endif
 #endif

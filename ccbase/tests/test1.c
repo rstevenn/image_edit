@@ -9,9 +9,9 @@
 
 int main(int argc, char *argv[]) {
 
-    InitLog("log.txt");
+    ccb_InitLog("log.txt");
  
-    INFO("Test 1")
+    CCB_INFO("Test 1")
     
     bsdlInit();
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
         frame++;
         if (time(NULL) > seconds) {
             
-            INFO(" FPS: %lu", frame)
+            CCB_INFO(" FPS: %lu", frame)
 
             frame = 0;
             seconds = time(NULL);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     bsdlFreeWindow(window2);
     bsdlFree();
 
-    CloseLogFile();
+    ccb_CloseLogFile();
  
     return 0;
 }

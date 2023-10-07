@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "bake.h"
 
-void run(void* (fnct)(size_t*), char* name, FILE* fp) {
+void bake_impl(void* (fnct)(size_t*), char* name, FILE* fp) {
     printf("backing %s...\n", name);
 
     size_t size;
@@ -19,7 +20,6 @@ void run(void* (fnct)(size_t*), char* name, FILE* fp) {
         fprintf(fp, "%d, ", out[i] );
     }
     
-
     fprintf(fp, "};\n");
     fprintf(fp, "   void* out = malloc(%d);\n", size);
     fprintf(fp, "   memmove(out, data, %d);\n", size);
@@ -27,9 +27,21 @@ void run(void* (fnct)(size_t*), char* name, FILE* fp) {
 
     fprintf(fp, "}\n\n");
 
-
     free(out);
 }
+
+#define BAKETYPEIMPL(func, type) {  printf("backing %s...\n", #func);\
+                                    type out = func(); \
+                                    fprintf(fp, "%s %s(size_t* size) {\n", #type, #func); \
+                                    fprintf(fp, "   char data[] = {"); \
+                                    for (size_t i=0; i<sizeof(#type); i++) { \
+                                        fprintf(fp, "%d, ", ((char*)&out)[i] ); \
+                                    }\
+                                    fprintf(fp, "};\n"); \
+                                    fprintf(fp, "   return *((%s*)data);\n", #type); \
+                                    fprintf(fp, "}\n\n"); \
+                                }
+
 
 
 void init_file(FILE* fp) {
@@ -42,20 +54,21 @@ int main() {
     FILE* fp = fopen("baked.c", "w");
     init_file(fp);
 
-#define BAKE(func) run(func, #func, fp);
+// macro magic
+#define BAKE(func) bake_impl(func, #func, fp);
+#define BAKETYPE(func, type) BAKETYPEIMPL(func, type)
 
-// macor magic
-#define BAKETYPE(func, type) {  printf("backing %s...\n", #func);\
-                                type out = func(); \
-                                fprintf(fp, "%s %s(size_t* size) {\n", #type, #func); \
-                                fprintf(fp, "   char data[] = {"); \
-                                for (size_t i=0; i<sizeof(#type); i++) { \
-                                    fprintf(fp, "%d, ", ((char*)&out)[i] ); \
-                                }\
-                                fprintf(fp, "};\n"); \
-                                fprintf(fp, "   return *((%s*)data);\n", #type); \
-                                fprintf(fp, "}\n\n"); \
-                             }
+#define BAKEINT(func) 
+#define BAKELONG(func)
+#define BAKELONGLONG(func)
+
+#define BAKEFLOAT(func)
+#define BAKELONGFLOAT(func)
+#define BAKEDOUBLE(func)
+#define BAKELONGDOUBLE(func)
+
+#define BAKECHAR(func)
+
 
     Functions()
 

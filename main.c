@@ -4,7 +4,6 @@
 #include <windows.h>
 
 
-#undef ERROR
 #include "config.h"
 #include "ccbase/logs/log.h"
 #include "ccbase/betterSDL/bsdl.h"

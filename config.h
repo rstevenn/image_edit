@@ -4,24 +4,24 @@
 #define INPUT_FILE "./inp/h849lhurffr71.jpg"
 #define OUTPUT_FILE "./out/out.png"
 
-#ifdef LOGLEVEL
-#undef LOGLEVEL
+#ifdef CCB_LOGLEVEL
+#undef CCB_LOGLEVEL
 #endif
 
 
-#ifdef LOGTYPE
-#undef LOGTYPE
+#ifdef CCB_LOGTYPE
+#undef CCB_LOGTYPE
 #endif
 
 #ifdef DEBUGIMEDIT
 
-#define LOGLEVEL 2
-#define LOGTYPE 2
+#define CCB_LOGLEVEL 2
+#define CCB_LOGTYPE 2
 
 #else
 
-#define LOGLEVEL 1
-#define LOGTYPE 1
+#define CCB_LOGLEVEL 1
+#define CCB_LOGTYPE 1
 
 #endif
 

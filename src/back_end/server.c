@@ -1,12 +1,46 @@
 #include "server.h"
 #include <math.h>
 
+mouse_pos_history_t mouse_hist = {0};
+pxl_change_cache prev_change_cache = {0};
+
+
+
 float length(float dx, float dy) {
     return sqrtf((dx)*(dx) + (dy)*(dy));
 }
 
-void cubic_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path) {
 
+void cache_update_pxl(unsigned char* texture, pxl_change_cache* cache, size_t id, unsigned char color[4]) {
+    
+    unsigned char before[4];
+
+    before[0] = texture[id  ];
+    before[1] = texture[id+1];
+    before[2] = texture[id+2];
+    before[3] = texture[id+3];
+
+    add_pxl_change_cache(cache, init_pxl_change(id, before, color));
+    
+    texture[id  ] = color[0];
+    texture[id+1] = color[1];
+    texture[id+2] = color[2];
+    texture[id+3] = color[3];
+}
+
+void cache_revert(unsigned char* texture, pxl_change_cache* cache) {
+    for (size_t i=cache->size-1; i<=0; i++) {
+        int id = cache->hist[i].id;
+        texture[id  ] = cache->hist[i].color_before[0];
+        texture[id+1] = cache->hist[i].color_before[1];
+        texture[id+2] = cache->hist[i].color_before[2];
+        texture[id+3] = cache->hist[i].color_before[3];
+    }
+}
+
+
+
+void four_points_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path) {
 
     float alpha = 0.9;
 
@@ -26,35 +60,13 @@ void cubic_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path) 
         smoothed_path->size = 1;
         INFO("SMOOTH 1 END")
 
-    } else if (state.prev_size == 2) {
+    } else if (state.prev_size >= 2) {
 
-        
-        float px = (float)state.x[0];
-        float py = (float)state.y[0];
 
-        // push init pos
-        NOTNULL(smoothed_path->x = (int*)malloc(sizeof(int)), "can't allocate memory")
-        NOTNULL(smoothed_path->y = (int*)malloc(sizeof(int)), "can't allocate memory")
-        smoothed_path->x[0] = px; smoothed_path->y[0] = py;
+        INFO("SMOOTH 2")
 
-        smoothed_path->size = 1;
-
-    } else {
-        INFO("SMOOTH >2")
-        float dxa = (float)state.x[1] - (float)state.x[2]; 
-        float dya = (float)state.y[1] - (float)state.y[2];
-
-        float la = length(dxa, dya);
-
-        float vx, vy;
-
-        if (la > 0) {
-            vx = dxa / la;
-            vy = dya / la;
-        } else {
-            vx = 0;
-            vy = 0;   
-        }
+        float vx=0;
+        float vy=0;
 
         size_t i=1;
         
@@ -73,8 +85,7 @@ void cubic_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path) 
         while (px != state.x[0] ||
                py != state.y[0]) {
             INFO("LOOP")
-            //INFO("Dist: %f", length( px-(float)state.x[0], py-(float)state.y[0]))
-            //INFO("speed: %f %f", vx, vy)
+
 
             px += vx;
             py += vy; 
@@ -109,7 +120,7 @@ size_t pull_window_event(app_state_t* app_data, call_back_t* call_back) {
     if (app_data->event_nb == 0) { INFO("No event") return 0;} 
 
     // wait mutex
-    CHECK(WaitForSingleObject(app_data->event_acces_mtx, WAIT_TIMEOUT) == 0, "wait mutex failed")
+    CHECK(WaitForSingleObject(app_data->event_acces_mtx, INFINITE) == 0, "wait mutex failed")
     INFO("got mutex")
 
     call_back_t* queue = (call_back_t *)(app_data->call_backs);
@@ -157,8 +168,63 @@ void callback_handler(call_back_t cb) {
 void draw_pxl(draw_pixel_data_t* data) {
     INFO("Draw pixel")
 
+    if (!data->mouse.left) {
+        mouse_hist.prev_size = 0;
+        mouse_hist.next = 0;
+        prev_change_cache.size = 0;
+        return;
+    } 
+
+    if (mouse_hist.prev_size == 0) {
+        mouse_hist.prev_size++;
+        mouse_hist.x[0] = data->mouse.u; 
+        mouse_hist.y[0] = data->mouse.v;
+    } else {
+
+        mouse_hist.next = 1;
+        mouse_hist.next_x = data->mouse.u;
+        mouse_hist.next_y = data->mouse.v;
+
+        CHECK(prev_change_cache.size > 0, "Already draw without cache")
+        cache_revert(data->win->texture, &prev_change_cache);
+        prev_change_cache.size = 0;
+
+        smoothed_path_t new_smoothed_path = {0}; 
+        (*data->smoothing)(mouse_hist, &new_smoothed_path);
+        
+        for (size_t id=0; id<new_smoothed_path.size; id++) {
+            if (0 < new_smoothed_path.x[id] && new_smoothed_path.x[id] < data->win->w &&
+                0 < new_smoothed_path.y[id] && new_smoothed_path.y[id] < data->win->h ) {
+
+                INFO("DRAW %d %d", new_smoothed_path.x[id], new_smoothed_path.y[id])
+                size_t i = new_smoothed_path.x[id];
+                size_t j = new_smoothed_path.y[id];
+                size_t coord = (j*data->win->w)*4 + 4*i;
+                
+                data->win->texture[coord]  = data->color[0];
+                data->win->texture[coord+1] = data->color[1];
+                data->win->texture[coord+2] = data->color[2];
+                data->win->texture[coord+3] = data->color[3];
+            } 
+        }
+        free(new_smoothed_path.x); free(new_smoothed_path.y);
+        
+        if (mouse_hist.prev_size < 3) {
+            mouse_hist.x[mouse_hist.prev_size] = data->mouse.u;
+            mouse_hist.y[mouse_hist.prev_size] = data->mouse.v;
+            mouse_hist.prev_size++;
+        } else {
+            mouse_hist.x[0] = mouse_hist.x[1];
+            mouse_hist.y[0] = mouse_hist.y[1];
+            mouse_hist.x[1] = mouse_hist.x[2];
+            mouse_hist.y[1] = mouse_hist.y[2];
+            mouse_hist.x[2] = data->mouse.u;
+            mouse_hist.y[2] = data->mouse.v;
+        }
+    }
+
     smoothed_path_t smoothed_path = {0};
-    (*data->smoothing)(data->mouse_hist, &smoothed_path);
+    (*data->smoothing)(mouse_hist, &smoothed_path);
     INFO("Smoothed")
 
     for (size_t id=0; id<smoothed_path.size; id++) {
@@ -170,11 +236,7 @@ void draw_pxl(draw_pixel_data_t* data) {
             size_t i = smoothed_path.x[id];
             size_t j = smoothed_path.y[id];
             size_t coord = (j*data->win->w)*4 + 4*i;
-            
-            data->win->texture[coord  ] = data->color[0];
-            data->win->texture[coord+1] = data->color[1];
-            data->win->texture[coord+2] = data->color[2];
-            data->win->texture[coord+3] = data->color[3];
+            cache_update_pxl(data->win->texture, &prev_change_cache, coord, data->color);
         } 
     }
 
@@ -185,13 +247,12 @@ void draw_pxl(draw_pixel_data_t* data) {
 
 void update_texture(app_state_t* app_data) {
 
-    CHECK(WaitForSingleObject(app_data->texture_update_mtx, WAIT_TIMEOUT) == 0, "wait mutex failed")
+    CHECK(WaitForSingleObject(app_data->texture_update_mtx, INFINITE) == 0, "wait mutex failed")
     NOTNULL(app_data->window->texture = memcpy(app_data->window->texture, app_data->texture, sizeof(unsigned char)*app_data->w*app_data->h*4),
             "Can't copy from buffer texture to texture")
     CHECK(ReleaseMutex(app_data->texture_update_mtx) != 0, "Failed to release mutex");
 
 }
-
 
 
 void stb2bsdl(unsigned char* src, unsigned char* dest, unsigned int w, unsigned int h) {
@@ -206,7 +267,6 @@ void stb2bsdl(unsigned char* src, unsigned char* dest, unsigned int w, unsigned 
         }   
     }
 }
-
 
 void bsdl2stb(unsigned char* src, unsigned char* dest, unsigned int w, unsigned int h) {
     for (int l=0; h; l++) {

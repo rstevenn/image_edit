@@ -3,7 +3,7 @@
     #define LOGTYPE 2
 #endif
 
-#include "../logs/log.h"
+
 #include <string.h>
 #include "bsdl.h"
 

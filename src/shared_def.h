@@ -5,7 +5,6 @@
 #undef ERROR
 
 #include "../ccbase/betterSDL/bsdl.h"
-#define MAX_MOUSE_HISTORY 3
 
 
 // main data of the app
@@ -26,11 +25,28 @@ typedef struct {
 
 
 typedef struct {
-    int x[MAX_MOUSE_HISTORY];
-    int y[MAX_MOUSE_HISTORY];
+    int x[3];
+    int y[3];
+
+    int next_x;
+    int next_y;
 
     size_t prev_size;
+    unsigned char next;
+
 } mouse_pos_history_t;
+
+
+typedef struct {
+    unsigned char left;
+    unsigned char right;
+    
+    int x, y;
+    unsigned char quit;
+
+    float u, v;
+} mouse_state_t;
+
 
 // smooth data
 typedef struct {
@@ -44,7 +60,7 @@ typedef struct {
 typedef void(smoothing_t)(mouse_pos_history_t state, smoothed_path_t* smoothed_path); 
 
 typedef struct {
-    mouse_pos_history_t mouse_hist;
+    mouse_state_t mouse;
     smoothing_t* smoothing;
     
     unsigned char color[4];
@@ -83,7 +99,7 @@ typedef struct {
 
 // functions for callbak
 void draw_pxl(draw_pixel_data_t* data);
-void cubic_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path); // ALLOCATE DATA ON X Y 
+void four_points_smoothing(mouse_pos_history_t state, smoothed_path_t* smoothed_path); // ALLOCATE DATA ON X Y 
 
 
 #endif 

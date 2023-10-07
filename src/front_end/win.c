@@ -88,9 +88,6 @@ void window_th(void* args) {
     mouse_state_t mouse_state = {0};
     app_data->run = 1;
 
-    mouse_pos_history_t mouse_hist;
-    mouse_hist.prev_size = 0;
-
 
     while (! mouse_state.quit) {
         
@@ -99,19 +96,9 @@ void window_th(void* args) {
         CHECK(ReleaseMutex(app_data->texture_update_mtx) != 0, "Failed to release mutex");
         
         
-        if (mouse_state.left) {
-            INFO("clicked")
             CHECK(WaitForSingleObject(app_data->event_acces_mtx, WAIT_TIMEOUT) == 0, "wait mutex failed")
             INFO("Acces mutex")
-            
-            // add to history
-            for (size_t i=0; i< MAX_MOUSE_HISTORY-1; i++) {
-                mouse_hist.x[i+1] = mouse_hist.x[i];
-                mouse_hist.y[i+1] = mouse_hist.y[i]; 
-            }
-
-            if (mouse_hist.prev_size < MAX_MOUSE_HISTORY)
-                mouse_hist.prev_size++;
+    
 
             // add action to queue
             queue = (call_back_t *)(app_data->call_backs);
@@ -130,17 +117,11 @@ void window_th(void* args) {
             if (w == 0) w = 1;
             if (h == 0) h = 1;
 
-            mouse_hist.x[0] = window->width*mouse_state.x/w;
-            mouse_hist.y[0] = window->height*mouse_state.y/h;
+            mouse_state.u = window->width*mouse_state.x/w;
+            mouse_state.v = window->height*mouse_state.y/h;
 
-            mouse_pos_history_t mouse_tmp_hist;
-            mouse_tmp_hist.prev_size = mouse_hist.prev_size;
-            memcpy(mouse_tmp_hist.x, mouse_hist.x, sizeof(int)*mouse_tmp_hist.prev_size);
-            memcpy(mouse_tmp_hist.y, mouse_hist.y, sizeof(int)*mouse_tmp_hist.prev_size);
-            
-
-            cb_data.mouse_hist = mouse_tmp_hist;
-            cb_data.smoothing = &cubic_smoothing;
+            cb_data.mouse = mouse_state;
+            cb_data.smoothing = &four_points_smoothing;
             cb_data.win = app_data;
 
             queue[app_data->event_nb].data.draw_pixel_data = cb_data;
@@ -153,11 +134,6 @@ void window_th(void* args) {
             
             CHECK(ReleaseMutex(app_data->event_acces_mtx) != 0, "Failed to release mutex");
             INFO("Mutex released")
-
-
-        } else {
-            mouse_hist.prev_size = 0;
-        }
 
         SDL_Delay(1);
         
